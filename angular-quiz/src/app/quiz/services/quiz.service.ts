@@ -82,6 +82,10 @@ export class QuizService {
     const currentQuestionIndex = this.showResults()
     ? this.currentQuestionIndex()
     : this.currentQuestionIndex() + 1;
-        this.currentQuestionIndex.set(currentQuestionIndex);
+      this.currentQuestionIndex.set(currentQuestionIndex);
     }
+
+  restart() :void {
+    this.currentQuestionIndex.set(0);
+  }
   }
