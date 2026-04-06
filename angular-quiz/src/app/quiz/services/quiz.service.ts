@@ -6,11 +6,16 @@ export class QuizService {
 
   questions = signal<QuestionInterface[]>(this.getMockQuestions());
   currentQuestionIndex = signal<number>(0);
+  currentAnswer = signal<string | null>(null);
   
   currentQuestion = computed(()=> this.questions()[this.currentQuestionIndex()]);
-
+  correctAnswersCount = signal<number>(0);
   showResults = computed(()=> this.currentQuestionIndex() === this.questions().length-1);
-  
+
+  currentQuestionAnswers = computed(()=> 
+    this.shuffleAnswers(this.currentQuestion())
+  );
+
   getMockQuestions(): QuestionInterface[] {
     return [
       {
@@ -78,14 +83,35 @@ export class QuizService {
     ];
   }
 
+  restart() :void {
+    this.currentQuestionIndex.set(0);
+  }
+
+  shuffleAnswers(question: QuestionInterface): string[] {
+    const unshuffledAnswers = [
+      question.correctAnswer,
+      ...question.incorrectAnswers,
+    ];
+    return unshuffledAnswers
+      .map((a)=> ({ sort: Math.random(), value: a}))
+      .sort((a, b)=> a.sort - b.sort)
+      .map(a => a.value);
+  }
+
+  selectAnswer(answerText: string): void {
+    this.currentAnswer.set(answerText);
+    const correctAnswersCount = answerText === this.currentQuestion().correctAnswer 
+    ? this.correctAnswersCount() + 1 
+    : this.correctAnswersCount();
+    this.correctAnswersCount.set(correctAnswersCount);
+
+  }
+
   goToNextQuestion(): void {
     const currentQuestionIndex = this.showResults()
     ? this.currentQuestionIndex()
     : this.currentQuestionIndex() + 1;
       this.currentQuestionIndex.set(currentQuestionIndex);
+      this.currentAnswer.set(null);
     }
-
-  restart() :void {
-    this.currentQuestionIndex.set(0);
-  }
   }
